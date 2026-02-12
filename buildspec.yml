@@ -4,8 +4,8 @@ phases:
     commands:
       - echo Logging in to Amazon ECR....
       - aws --version
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 116571328983.dkr.ecr.us-east-1.amazonaws.com
-      - REPOSITORY_URI=116571328983.dkr.ecr.us-east-1.amazonaws.com/capstone-frontend
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 695359722844.dkr.ecr.us-east-1.amazonaws.com
+      - REPOSITORY_URI=695359722844.dkr.ecr.us-east-1.amazonaws.com/iitk-capstone-frontend
       - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
       - CONTAINER_NAME="frontend-container"
   build:
