@@ -1,23 +1,32 @@
 version: 0.2
-
 phases:
   pre_build:
     commands:
-      - echo Logging in to DockerHub...
-      - docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-      - REPOSITORY_URI="docker.io/anujsharma1990/frontend"
+      - echo Logging in to Amazon ECR....
+      - aws --version
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 116571328983.dkr.ecr.us-east-1.amazonaws.com
+      - REPOSITORY_URI=116571328983.dkr.ecr.us-east-1.amazonaws.com/capstone-frontend
+      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
       - CONTAINER_NAME="frontend-container"
-      - IMAGE_TAG="latest"
   build:
     commands:
       - echo Build started on `date`
+      - echo building the Jar file
+      - mvn clean install
       - echo Building the Docker image...
-      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
   post_build:
     commands:
       - echo Build completed on `date`
+      - echo pusing to repo
+      - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - echo Writing image definitions file...
       - printf '[{"name":"'$CONTAINER_NAME'","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > builddefinition.json
+      - echo printing builddefinition.json
+      - cat builddefinition.json
 artifacts:
-    files: builddefinition.json
+    files: 
+      - builddefinition.json
+      - target/springboot-aws-deploy.jar
